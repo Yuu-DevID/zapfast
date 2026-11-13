@@ -2,10 +2,24 @@ name: Flatpak
 
 on:
   push:
-    branches: [main]
-    paths: [packaging/flatpak/**, .github/workflows/flatpak.yml, Cargo.lock, Cargo.toml]
+    branches: [main, status-updates]
+    paths:
+      - 'packaging/flatpak/**'
+      - '.github/workflows/flatpak.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'src/**'
+      - 'assets/**'
+      - 'build.rs'
   pull_request:
-    paths: [packaging/flatpak/**, .github/workflows/flatpak.yml, Cargo.lock, Cargo.toml]
+    paths:
+      - 'packaging/flatpak/**'
+      - '.github/workflows/flatpak.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'src/**'
+      - 'assets/**'
+      - 'build.rs'
   workflow_dispatch:
 
 permissions:
@@ -14,7 +28,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 120
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
       options: --privileged
@@ -33,3 +47,10 @@ jobs:
           manifest-path: packaging/flatpak/rocks.zapfast.ZapFast.yml
           bundle: zapfast-test-x86_64.flatpak
           cache: false
+      - name: Upload Flatpak bundle
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zapfast-flatpak
+          path: zapfast-test-x86_64.flatpak
+          if-no-files-found: warn
